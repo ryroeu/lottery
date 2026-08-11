@@ -161,16 +161,15 @@ fetch_raw("eurodreams")    # FDJ — single live file
 |---|---|---|---|
 | Powerball | NY Open Data (`data.ny.gov`) | ✅ `fetch_raw` | through 2026-06 (1,128 draws) |
 | Mega Millions | NY Open Data (`data.ny.gov`) | ✅ `fetch_raw` | current matrix since 2025-04 (123 draws) |
-| EuroMillions | FDJ official history (`media.fdj.fr` + draw-info API) | ✅ `fetch_raw` | through 2026-06 (881 draws) |
+| EuroMillions | FDJ official history (draw-info API) | ✅ `fetch_raw` | through 2026-06 (881 draws) |
 | EuroDreams | FDJ official history (draw-info API) | ✅ `fetch_raw` | through 2026-06 (272 draws) |
 
 The two European games come from **FDJ** (the French operator). FDJ publishes history
 in semicolon-delimited, era-split files (the EuroMillions star pool changed over the
 years, so it's chunked; EuroDreams is one file). `fetch_raw` downloads the relevant
-files — stable `media.fdj.fr` archives for closed eras plus FDJ's live draw-info API
-for the current era — parses the French format, de-dupes by draw date, and writes one
-combined snapshot in the adapter's layout. (The UK national-lottery CSV endpoint was
-retired — it now serves only the latest draw as XML.)
+files from FDJ's draw-info API, parses the French format, de-dupes by draw date, and
+writes one combined snapshot in the adapter's layout. (The UK national-lottery CSV
+endpoint was retired — it now serves only the latest draw as XML.)
 
 Mega Millions changed its complete matrix on 2025-04-08: the Mega Ball pool fell
 from 25 to 24 and the $5 ticket gained an embedded random multiplier. Its canonical

@@ -53,22 +53,31 @@ FETCH_URLS = {
 }
 
 # EuroMillions: FDJ (the French operator) publishes the official history split by
-# rule-era (the star pool changed over the years). Closed eras are stable static
-# zips; the current era (2020-02 onward) is served LIVE via the draw-info API — the
-# static euromillions_202002.zip is a stale 2024 snapshot, so we use the API for it.
-# Together these cover 2016-09 to present, which the 2018 floor trims to 2018+.
+# rule-era (the star pool changed over the years). All eras are served through the
+# draw-info API; the current-era document is updated in place. Together these cover
+# 2016-09 to present, which the 2018 floor trims to 2018+.
 EUROMILLIONS_FDJ_SOURCES = [
-    "https://media.fdj.fr/static/csv/euromillions/euromillions_201609.zip",
-    "https://media.fdj.fr/static/csv/euromillions/euromillions_201902.zip",
-    "https://www.sto.api.fdj.fr/anonymous/service-draw-info/v3/"
-    "documentations/1a2b3c4d-9876-4562-b3fc-2c963f66afe6",
+    (
+        "https://www.sto.api.fdj.fr/anonymous/service-draw-info/v3/"
+        "documentations/1a2b3c4d-9876-4562-b3fc-2c963f66afc6"
+    ),
+    (
+        "https://www.sto.api.fdj.fr/anonymous/service-draw-info/v3/"
+        "documentations/1a2b3c4d-9876-4562-b3fc-2c963f66afd6"
+    ),
+    (
+        "https://www.sto.api.fdj.fr/anonymous/service-draw-info/v3/"
+        "documentations/1a2b3c4d-9876-4562-b3fc-2c963f66afe6"
+    ),
 ]
 
 # EuroDreams launched 2023-11 with one stable matrix, so FDJ serves it as a single
 # live file via the draw-info API (boule_1..6 + numero_dream).
 EURODREAMS_FDJ_SOURCES = [
-    "https://www.sto.api.fdj.fr/anonymous/service-draw-info/v3/"
-    "documentations/1a2b3c4d-9876-4562-b3fc-2c963f66afa5",
+    (
+        "https://www.sto.api.fdj.fr/anonymous/service-draw-info/v3/"
+        "documentations/1a2b3c4d-9876-4562-b3fc-2c963f66afa5"
+    ),
 ]
 
 
@@ -137,7 +146,12 @@ def _download_fdj(sources: list[str], n_main: int, special_cols: list[str]) -> d
     for url in sources:
         resp = requests.get(url, headers=_UA, timeout=60)
         resp.raise_for_status()
-        for row in _parse_fdj(resp.content, n_main, special_cols):
+        rows = _parse_fdj(resp.content, n_main, special_cols)
+        if not rows:
+            raise ValueError(
+                f"FDJ source produced no usable draws; its format may have changed: {url}"
+            )
+        for row in rows:
             by_date[row["date"]] = row
     return by_date
 
